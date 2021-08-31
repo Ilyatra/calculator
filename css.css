@@ -39,12 +39,17 @@
 }
 
 .calculator__input {
+    text-align: right;
     font-family: "Darker Grotesque";
     background-color: rgb(180, 180, 182), 0;
     border: none;
     margin: 0 5px 15px;
     font-size: 24px;
     width: 265px;
+}
+
+.calculator__input:focus {
+    outline: none; 
 }
 
 .calculator__button {

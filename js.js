@@ -25,7 +25,11 @@ const operators = {
     '*' : 1,
 }
 const inputField = document.querySelector('.calculator__input');
-const testStr = '4+2*2*2-4/2'
+const testStr = '4+2*2*2-4/2';
+const keydown = new KeyboardEvent ('keydown', {
+    bubbles: true,
+    cancelable: true,
+})
 
 const opVerification = function(op) {
     if (inputField.value.length == 0 && op !== '-') return true;
@@ -65,29 +69,33 @@ const calculateStr = function(str, regExp) {
     } while (matched);
     return str;
 }
-console.log(calculateStr(calculateStr(testStr, /(\d+)([\*\/])(\d+)/), /(\d+)([\-\+])(\d+)/));
 
-calculatorElement.querySelector('.calculator__input').addEventListener('keydown', (e) => {
+const clear = function() {
+    inputField.value = '';
+}
+// console.log(calculateStr(calculateStr(testStr, /(\d+)([\*\/])(\d+)/), /(\d+)([\-\+])(\d+)/));
 
-    if (!allowedCharacters[e.key]) {
+document.addEventListener('keydown', (e) => {
+    let key  = e.key;
+    if (!e.isTrusted) key = e.target.name;
+    if (!allowedCharacters[key]) {
         e.preventDefault();
         return;
     }
-
-    if (operators[e.key] && opVerification(e.key)) {
+    if (operators[key] && opVerification(key)) {
         e.preventDefault();
+        return;
     }
-
-    // if (operators[e.key] && operators[e.target.value[e.target.value.length]]) {
-    //     console.log('dsfsfs')
-    //     e.preventDefault();
-    //     e.target.value[e.target.value.length] = e.key;
-    //     return;
-    // }
-
+    if (key === 'Backspace'){
+        inputField.value = inputField.value.slice(0, -1);
+        return;
+    }
+    inputField.value += key;
+    e.preventDefault();
 })
-// calculatorElement.querySelector('.calculator__input').addEventListener('keyup', (e) => {
-//     console.log(e.target.value[e.target.value.length -1] );
-//     console.log(e.target.value.length );
 
-// })
+
+document.addEventListener('click', (e) => {
+    if (!e.target.name) return;
+    e.target.dispatchEvent(keydown);
+})
