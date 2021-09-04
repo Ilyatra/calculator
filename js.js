@@ -1,5 +1,5 @@
-const calculatorElement = document.querySelector('.calculator');
-const allowedCharacters = {
+// const calculatorElement = document.querySelector('.calculator');
+const numbersKey = {
     0 : 1,
     1 : 1,
     2 : 1,
@@ -10,30 +10,32 @@ const allowedCharacters = {
     7 : 1,
     8 : 1,
     9 : 1,
-    '-' : 1,
-    '+' : 1,
-    '=' : 1,
-    '/' : 1,
-    '*' : 1,
-    'Backspace' : 1,
 }
-const operators = {
+const operatorsKey = {
     '-' : 1,
     '+' : 1,
-    '=' : 1,
     '/' : 1,
     '*' : 1,
+}
+const controlKey = {
+    'Backspace' : () => inputField.value = inputField.value.slice(0, -1),
+    'Clear' : () => inputField.value = '',
+    '=' : () => {
+        let mulDivRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d+\.?\d*)([\*\/])((?:(?<=[\-\+\*\/])\-)*\d+\.?\d*)/;
+        let addSubRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d+\.?\d*)([\-\+])((?:(?<=[\-\+\*\/])\-)*\d+\.?\d*)/;
+        inputField.value = calculateStr(calculateStr(inputField.value, mulDivRegexp), addSubRegexp);
+    },
 }
 const inputField = document.querySelector('.calculator__input');
-const testStr = '4+2*2*2-4/2';
-const keydown = new KeyboardEvent ('keydown', {
+const resultField = document.querySelector('.calculator__result-field');
+const keydownEvent = new KeyboardEvent ('keydown', {
     bubbles: true,
     cancelable: true,
 })
 
 const opVerification = function(op) {
     if (inputField.value.length == 0 && op !== '-') return true;
-    if (operators[inputField.value.slice(-1)]) {
+    if (operatorsKey[inputField.value.slice(-1)]) {
         if (inputField.value.length == 1) {
             inputField.value = '';
             return true; 
@@ -44,7 +46,8 @@ const opVerification = function(op) {
     return false;
 }
 
-const calculateExpression = function parseAndCalculateStr(a, op, b) {
+const calculateExpression = function (a, op, b) {
+    console.log(a + ' ' + op + ' ' + b)
     switch (op) {
         case '+':
             return +a + +b;
@@ -62,6 +65,7 @@ const calculateStr = function(str, regExp) {
     do {
         matched = false;
         str = str.replace(regExp,(match, p1, p2, p3) => {
+            console.log(match)
             matched = true;
             return calculateExpression(p1,p2,p3);
          }   
@@ -78,16 +82,19 @@ const clear = function() {
 document.addEventListener('keydown', (e) => {
     let key  = e.key;
     if (!e.isTrusted) key = e.target.name;
-    if (!allowedCharacters[key]) {
+    if (!numbersKey[key] && !operatorsKey[key] && !controlKey[key]) {
         e.preventDefault();
         return;
     }
-    if (operators[key] && opVerification(key)) {
+    if (operatorsKey[key]) {
+        console.log(key)
+        if (!opVerification(key)) inputField.value += key
         e.preventDefault();
         return;
     }
-    if (key === 'Backspace'){
-        inputField.value = inputField.value.slice(0, -1);
+    if (controlKey[key]) {
+        controlKey[key]();
+        e.preventDefault();
         return;
     }
     inputField.value += key;
@@ -97,5 +104,5 @@ document.addEventListener('keydown', (e) => {
 
 document.addEventListener('click', (e) => {
     if (!e.target.name) return;
-    e.target.dispatchEvent(keydown);
+    e.target.dispatchEvent(keydownEvent);
 })
