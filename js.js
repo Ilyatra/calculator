@@ -38,6 +38,11 @@ const keydownEvent = new KeyboardEvent ('keydown', {
     cancelable: true,
 })
 
+const inputEvent = new 	InputEvent ('input', {
+    bubbles: true,
+    cancelable: true,
+})
+
 const opProcessing = function(op) {
     if (inputField.value.length == 0 && op !== '-') return;
     if (operatorsKey[inputField.value.slice(-1)]) {
@@ -100,6 +105,14 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         return;
     }
+    inputField.focus();
+    inputField.setSelectionRange(inputField.value.length-1, inputField.value.length-1);
+    if (inputField.value.length < 12 && inputField.classList.contains('smaller-font')){
+        inputField.classList.remove('smaller-font');
+        inputField.classList.remove('more-smaller-font');
+    }else if (inputField.value.length > 12 && !inputField.classList.contains('smaller-font')){
+        inputField.classList.add('smaller-font');
+    }
     if (operatorsKey[key]) {
         opProcessing(key);
         e.preventDefault();
@@ -110,6 +123,7 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         return;
     }
+    
     inputField.value += key;
     e.preventDefault();
 })
