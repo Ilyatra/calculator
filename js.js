@@ -21,14 +21,10 @@ const controlKey = {
     'Clear' : () => clear(),
     '.' : () => addDot(),
     '=' : () => {
-        let mulDivRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d+\.?\d*)([\*\/])((?:(?<=[\-\+\*\/])\-)*\d+\.?\d*)/;
-        let addSubRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d+\.?\d*)([\-\+])((?:(?<=[\-\+\*\/])\-)*\d+\.?\d*)/;
-        inputField.value = calculateStr(calculateStr(inputField.value, mulDivRegexp), addSubRegexp);
+        inputField.value = round(calculate());
     },
     'Enter' : () => {
-        let mulDivRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d+\.?\d*)([\*\/])((?:(?<=[\-\+\*\/])\-)*\d+\.?\d*)/;
-        let addSubRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d+\.?\d*)([\-\+])((?:(?<=[\-\+\*\/])\-)*\d+\.?\d*)/;
-        inputField.value = calculateStr(calculateStr(inputField.value, mulDivRegexp), addSubRegexp);
+        inputField.value = round(calculate());
     },
 }
 const inputField = document.querySelector('.calculator__input');
@@ -76,11 +72,22 @@ const calculateStr = function(str, regExp) {
         matched = false;
         str = str.replace(regExp,(match, p1, p2, p3) => {
             matched = true;
+            console.log(p1,p2,p3)
             return calculateExpression(p1,p2,p3);
          })
     } while (matched);
     return str;
 }
+
+const calculate = function() {
+    let mulDivRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d*\.?\d*)([\*\/])((?:(?<=[\-\+\*\/])\-)*\d*\.?\d*)/;
+    let addSubRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d*\.?\d*)([\-\+])((?:(?<=[\-\+\*\/])\-)*\d*\.?\d*)/;
+    return calculateStr(calculateStr(inputField.value, mulDivRegexp), addSubRegexp);
+}
+
+const round = function(num) {
+    return Math.round(num * 1000000000000) / 1000000000000;
+  }
 
 const addDot = function() {
     for (let i = inputField.value.length - 1; i > 0; i--) {
@@ -105,8 +112,10 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         return;
     }
+
     inputField.focus();
     inputField.setSelectionRange(inputField.value.length-1, inputField.value.length-1);
+
     if (inputField.value.length < 12 && inputField.classList.contains('smaller-font')){
         inputField.classList.remove('smaller-font');
         inputField.classList.remove('more-smaller-font');
