@@ -15,6 +15,7 @@ const operatorsKey = {
     '+' : 1,
     '/' : 1,
     '*' : 1,
+    '%' : 1,
 }
 const controlKey = {
     'Backspace' : () => inputField.value = inputField.value.slice(0, -1),
@@ -63,6 +64,8 @@ const calculateExpression = function (a, op, b) {
             return +a / +b;
         case '*':
             return +a * +b;
+        case '%':
+            return +a / 100 * +b;
     }
 }
 
@@ -80,13 +83,13 @@ const calculateStr = function(str, regExp) {
 }
 
 const calculate = function() {
-    let mulDivRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d*\.?\d*)([\*\/])((?:(?<=[\-\+\*\/])\-)*\d*\.?\d*)/;
+    let mulDivRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d*\.?\d*)([\*\/\%])((?:(?<=[\-\+\*\/])\-)*\d*\.?\d*)/;
     let addSubRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d*\.?\d*)([\-\+])((?:(?<=[\-\+\*\/])\-)*\d*\.?\d*)/;
     return calculateStr(calculateStr(inputField.value, mulDivRegexp), addSubRegexp);
 }
 
 const round = function(num) {
-    return Math.round(num * 1000000000000) / 1000000000000;
+    return Math.round(num * 1e11) / 1e11;
   }
 
 const addDot = function() {
