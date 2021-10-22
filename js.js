@@ -22,11 +22,23 @@ const controlKey = {
     'Clear' : () => clear(),
     '.' : () => addDot(),
     '=' : () => {
-        inputField.value = round(calculate());
+        if (operatorsKey[inputField.value[inputField.value.length-1]]) return;
+        inputField.value = round(calculate(inputField.value));
     },
     'Enter' : () => {
-        inputField.value = round(calculate());
+        if (operatorsKey[inputField.value[inputField.value.length-1]]) return;
+        inputField.value = round(calculate(inputField.value));
     },
+    'v' : (ctrl) => {
+        if (!ctrl) return;
+        navigator.clipboard.readText().then(text => {
+                inputField.value = inputField.value + text;
+        })
+    },
+    'c' : (ctrl) => {
+        if (!ctrl) return;
+        window.navigator.clipboard.writeText(inputField.value);
+    }
 }
 const inputField = document.querySelector('.calculator__input');
 const resultField = document.querySelector('.calculator__result-field');
@@ -55,6 +67,7 @@ const opProcessing = function(op) {
 }
 
 const calculateExpression = function (a, op, b) {
+    console.log(a,op,b)
     switch (op) {
         case '+':
             return +a + +b;
@@ -69,27 +82,64 @@ const calculateExpression = function (a, op, b) {
     }
 }
 
-const calculateStr = function(str, regExp) {
-    let matched = false;
+const testString = function(str, searchValueInObj) {
+    for (let i = 1; i < str.length; i++) {
+        if (searchValueInObj[str[i]]) {
+            return [str[i], i];
+        }
+    }
+    return [false, false];
+}
+
+const searchExpression = function(str, op, opPos){
+    const needle = Object.assign(numbersKey, {'.' : 1, '-' : 1});
+    let leftSide = '', rightSide = '';
+    let startPos, endPos;
+    for(let i = opPos - 1; i >= 0; i--) {
+        if (!needle[str[i]]) break;
+        leftSide = leftSide + str[i];
+        startPos = i;
+        if (str[i] === '-') break;
+    }
+    leftSide = leftSide.split('').reverse().join('');
+    for(let i = opPos + 1; i < str.length; i++) {
+        if (!needle[str[i]]) break;
+        if (str[i] === '-') break;
+        rightSide = rightSide + str[i];
+        endPos = i;
+    }
+    return {leftSide, rightSide, startPos, endPos}
+}
+
+const calculate = function(str) {
+    let op;
+    let opPos;
+    const firstPriorityOp = {'*':1,'%':1,'/':1,};
+    const secondPriorityOp = {'-':1,'+':1,};
+
+    const f = function(priority){
+        op = '';
+        [op, opPos] = testString(str, priority);
+        if (!op) return;
+        let {leftSide, rightSide, startPos, endPos} = searchExpression(str, op, opPos);
+        if (rightSide === '' || leftSide ===  '') {
+            op = false;
+            return;
+        }
+        let result = calculateExpression(leftSide, op, rightSide);
+        str = str.slice(0, startPos) + result + str.slice(endPos + 1);
+    }
     do {
-        matched = false;
-        str = str.replace(regExp,(match, p1, p2, p3) => {
-            matched = true;
-            console.log(p1,p2,p3)
-            return calculateExpression(p1,p2,p3);
-         })
-    } while (matched);
+        f (firstPriorityOp);
+    } while (op)
+    do {
+        f (secondPriorityOp);
+    } while (op)
     return str;
 }
 
-const calculate = function() {
-    let mulDivRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d*\.?\d*)([\*\/\%])((?:(?<=[\-\+\*\/])\-)*\d*\.?\d*)/;
-    let addSubRegexp = /((?:(?<=[\-\+\*\/]|^)\-)*\d*\.?\d*)([\-\+])((?:(?<=[\-\+\*\/])\-)*\d*\.?\d*)/;
-    return calculateStr(calculateStr(inputField.value, mulDivRegexp), addSubRegexp);
-}
-
 const round = function(num) {
-    return Math.round(num * 1e11) / 1e11;
+    return Math.round(num * 1e8) / 1e8;
   }
 
 const addDot = function() {
@@ -131,11 +181,10 @@ document.addEventListener('keydown', (e) => {
         return;
     }
     if (controlKey[key]) {
-        controlKey[key]();
-        e.preventDefault();
+        controlKey[key](e.ctrlKey);
+        // e.preventDefault();
         return;
     }
-    
     inputField.value += key;
     e.preventDefault();
 })
