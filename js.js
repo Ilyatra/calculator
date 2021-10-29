@@ -29,16 +29,6 @@ const controlKey = {
         if (operatorsKey[inputField.value[inputField.value.length-1]]) return;
         inputField.value = round(calculate(inputField.value));
     },
-    'v' : (ctrl) => {
-        if (!ctrl) return;
-        navigator.clipboard.readText().then(text => {
-                inputField.value = inputField.value + text;
-        })
-    },
-    'c' : (ctrl) => {
-        if (!ctrl) return;
-        window.navigator.clipboard.writeText(inputField.value);
-    }
 }
 const inputField = document.querySelector('.calculator__input');
 const resultField = document.querySelector('.calculator__result-field');
@@ -139,7 +129,7 @@ const calculate = function(str) {
 }
 
 const round = function(num) {
-    return Math.round(num * 1e8) / 1e8;
+    return Math.round(num * 1e5) / 1e5;
   }
 
 const addDot = function() {
@@ -162,31 +152,22 @@ document.addEventListener('keydown', (e) => {
     let key  = e.key;
     if (!e.isTrusted) key = e.target.name;
     if (!numbersKey[key] && !operatorsKey[key] && !controlKey[key]) {
-        e.preventDefault();
         return;
     }
 
     inputField.focus();
     inputField.setSelectionRange(inputField.value.length-1, inputField.value.length-1);
 
-    if (inputField.value.length < 12 && inputField.classList.contains('smaller-font')){
-        inputField.classList.remove('smaller-font');
-        inputField.classList.remove('more-smaller-font');
-    }else if (inputField.value.length > 12 && !inputField.classList.contains('smaller-font')){
-        inputField.classList.add('smaller-font');
-    }
     if (operatorsKey[key]) {
         opProcessing(key);
-        e.preventDefault();
         return;
     }
     if (controlKey[key]) {
         controlKey[key](e.ctrlKey);
-        // e.preventDefault();
         return;
     }
     inputField.value += key;
-    e.preventDefault();
+    return;
 })
 
 
