@@ -13,13 +13,12 @@
     background-color: white;
     position: absolute;
     width: 100vw;
-    height: 210px;
+    height: 245px;
     z-index: 0;
     border-bottom: solid 3px #989898;
 }
 
 .calculator {
-    /* display: flex; */
     flex-direction: column;
     z-index: 1;
 }
@@ -36,7 +35,6 @@
 }
 
 .calculator__input {
-    /* display: inline-flex; */
     text-align: right;
     font-family: "Darker Grotesque";
     background-color: rgb(180, 180, 182), 0;
@@ -46,7 +44,6 @@
     width: 265px;
     height: 30px;
     overflow: auto;
-    /* overflow-wrap: break-word; */
 }
 
 .calculator__input:focus {
@@ -63,7 +60,15 @@
 }
 
 .calculator__result-field {
-    height: 15px;
+    text-align: right;
+    font-family: "Arial";
+    color: #565657;
+    font-size: 14px;
+    height: 35px;
+    overflow: hidden;
+    margin: 0 8px;
+    white-space: nowrap;
+    width: 265px;
 }
 
 .long-vert-button {

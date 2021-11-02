@@ -23,10 +23,12 @@ const controlKey = {
     '.' : () => addDot(),
     '=' : () => {
         if (operatorsKey[inputField.value[inputField.value.length-1]]) return;
+        resultField.innerHTML = inputField.value + ' =';
         inputField.value = round(calculate(inputField.value));
     },
     'Enter' : () => {
         if (operatorsKey[inputField.value[inputField.value.length-1]]) return;
+        resultField.innerHTML = inputField.value + ' =';
         inputField.value = round(calculate(inputField.value));
     },
 }
@@ -75,6 +77,7 @@ const calculateExpression = function (a, op, b) {
 const testString = function(str, searchValueInObj) {
     for (let i = 1; i < str.length; i++) {
         if (searchValueInObj[str[i]]) {
+            if (str[i] === '+' && str[i-1] === 'e') continue;
             return [str[i], i];
         }
     }
@@ -82,11 +85,12 @@ const testString = function(str, searchValueInObj) {
 }
 
 const searchExpression = function(str, op, opPos){
-    const needle = Object.assign(numbersKey, {'.' : 1, '-' : 1});
+    const needle = Object.assign(numbersKey, {'.' : 1, '-' : 1, '+' : 1, 'e' : 1});
     let leftSide = '', rightSide = '';
     let startPos, endPos;
     for(let i = opPos - 1; i >= 0; i--) {
         if (!needle[str[i]]) break;
+        if (str[i] === '+' && str[i-1] !== 'e') break;
         leftSide = leftSide + str[i];
         startPos = i;
         if (str[i] === '-') break;
@@ -94,6 +98,7 @@ const searchExpression = function(str, op, opPos){
     leftSide = leftSide.split('').reverse().join('');
     for(let i = opPos + 1; i < str.length; i++) {
         if (!needle[str[i]]) break;
+        if (str[i] === '+' && str[i+1] !== 'e') break;
         if (str[i] === '-') break;
         rightSide = rightSide + str[i];
         endPos = i;
@@ -145,6 +150,7 @@ const addDot = function() {
 }
 
 const clear = function() {
+    resultField.innerHTML = '';
     inputField.value = '';
 }
 
